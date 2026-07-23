@@ -29,6 +29,21 @@ class Service extends Model
         ];
     }
 
+    /**
+     * Whether this service physically breeds/AIs the animal, and therefore
+     * requires a breeding-eligible animal (heifer/cow, never bull/steer —
+     * §10b). Every `protocol`-type service breeds; a config slug list covers
+     * breeding services of other types (e.g. on-call heat breeding).
+     */
+    public function breedsAnimal(): bool
+    {
+        if ($this->type === 'protocol') {
+            return true;
+        }
+
+        return in_array($this->slug, (array) config('protocol.breeding_service_slugs'), true);
+    }
+
     public function usageProfile(): HasOne
     {
         return $this->hasOne(SupplyUsageProfile::class);
