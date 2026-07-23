@@ -22,5 +22,6 @@ for f in $(ls docs/issues/*.md | sort -V); do
   echo "  + $title -> $url"
   rm -f "$body_file"
   created=$((created+1))
+  sleep 2   # pace to avoid GitHub secondary rate limit
 done
 echo "created $created issues"
