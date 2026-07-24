@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
+use App\Events\VisitCompleted;
 use App\Models\VisitCompletion;
 use App\Services\Protocol\RecomputeVisit3;
 
@@ -26,6 +27,10 @@ class VisitCompletionObserver
 
         $client = $completion->visit?->team?->client;
         $client?->recordCompletedVisit($completion->completed_at);
+
+        // Schedule the around-a-breeding follow-ups and any BCS nutrition
+        // nudge from the freshly-written records (§5.7 / M9 #246, #247).
+        VisitCompleted::dispatch($completion);
     }
 
     public function updated(VisitCompletion $completion): void
