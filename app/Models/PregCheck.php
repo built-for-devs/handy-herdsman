@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PregCheckMethod;
+use App\Enums\PregCheckState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -22,9 +24,16 @@ class PregCheck extends Model
     protected function casts(): array
     {
         return [
+            'method' => PregCheckMethod::class,
+            'state' => PregCheckState::class,
             'lab_requested' => 'boolean',
             'result_recorded_at' => 'datetime',
         ];
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function cattle(): BelongsTo
@@ -35,5 +44,16 @@ class PregCheck extends Model
     public function visit(): BelongsTo
     {
         return $this->belongsTo(Visit::class);
+    }
+
+    public function recordedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recorded_by');
+    }
+
+    /** Awaiting a lab result — nurture must NOT fire yet (§10b). */
+    public function isPending(): bool
+    {
+        return $this->state === PregCheckState::Pending;
     }
 }

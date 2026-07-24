@@ -24,6 +24,9 @@ class SemenLedgerEntry extends Model
 
     public const TYPE_USED = 'used';
 
+    /** A straw lost/failed in the attempt — decrements custody, flagged as waste (§5.5). */
+    public const TYPE_WASTED = 'wasted';
+
     public const TYPE_TRANSFERRED = 'transferred';
 
     public const FEE_RECEIPT = 'receipt';

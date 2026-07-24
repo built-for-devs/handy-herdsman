@@ -3,8 +3,10 @@
 use App\Http\Controllers\Admin\BlackoutController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\BookingVisitController;
+use App\Http\Controllers\Admin\PregCheckController;
 use App\Http\Controllers\Admin\SemenCustodyController;
 use App\Http\Controllers\Admin\SupplyController;
+use App\Http\Controllers\Admin\VisitCompletionController;
 use App\Http\Middleware\EnsureStaff;
 use Illuminate\Support\Facades\Route;
 
@@ -35,4 +37,12 @@ Route::middleware(['auth', 'verified', EnsureStaff::class])
         Route::patch('visits/{visit}', [BookingVisitController::class, 'update'])->name('visits.update');
         Route::post('visits/{visit}/fail', [BookingVisitController::class, 'fail'])->name('visits.fail');
         Route::post('blackouts', [BlackoutController::class, 'store'])->name('blackouts.store');
+
+        // M7 — appointment completion (#239) + async preg-check results (#241).
+        Route::get('visits/{visit}/completion', [VisitCompletionController::class, 'create'])->name('visits.completion.create');
+        Route::post('visits/{visit}/completion', [VisitCompletionController::class, 'store'])->name('visits.completion.store');
+
+        Route::get('preg-checks', [PregCheckController::class, 'index'])->name('preg-checks.index');
+        Route::post('preg-checks', [PregCheckController::class, 'store'])->name('preg-checks.store');
+        Route::post('preg-checks/{pregCheck}/result', [PregCheckController::class, 'result'])->name('preg-checks.result');
     });
