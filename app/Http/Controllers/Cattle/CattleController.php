@@ -75,6 +75,7 @@ class CattleController extends Controller
         return Inertia::render('cattle/Show', [
             'cattle' => $this->summary($cattle),
             'canEdit' => $request->user()->can('update', $cattle),
+            'shareableFields' => config('for_sale.shareable_fields'),
             'recordTypes' => config('records.types'),
             'bcs' => config('records.bcs'),
             'records' => $cattle->healthRecords->map(fn (HealthRecord $record) => [
@@ -154,7 +155,8 @@ class CattleController extends Controller
             'status' => $cattle->status->value,
             'a2a2' => $cattle->a2a2,
             'for_sale' => $cattle->for_sale,
-            'for_sale_shared_fields' => $cattle->for_sale_shared_fields,
+            'for_sale_shared_fields' => $cattle->for_sale_shared_fields ?? [],
+            'for_sale_listed_by_role' => $cattle->for_sale_listed_by_role,
             'notes' => $cattle->notes,
         ];
     }

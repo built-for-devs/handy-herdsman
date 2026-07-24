@@ -19,6 +19,8 @@ interface Cattle {
     has_calved: boolean;
     status: string;
     for_sale: boolean;
+    for_sale_shared_fields: string[];
+    for_sale_listed_by_role: string | null;
     notes: string | null;
 }
 
@@ -50,6 +52,7 @@ interface MediaItem {
 const props = defineProps<{
     cattle: Cattle;
     canEdit: boolean;
+    shareableFields: Record<string, string>;
     recordTypes: Record<string, string>;
     bcs: { min: number; max: number };
     records: HealthRecordItem[];
@@ -95,6 +98,33 @@ const onFile = (e: Event) => {
 };
 
 const deleteMedia = (id: number) => router.delete(route('cattle.media.destroy', id), { preserveScroll: true });
+
+const listingForm = useForm<{ for_sale: boolean; shared_fields: string[] }>({
+    for_sale: props.cattle.for_sale,
+    shared_fields: [...props.cattle.for_sale_shared_fields],
+});
+
+const toggleSharedField = (key: string) => {
+    const next = new Set(listingForm.shared_fields);
+    if (next.has(key)) {
+        next.delete(key);
+    } else {
+        next.add(key);
+    }
+    listingForm.shared_fields = [...next];
+};
+
+const listAnimal = () => {
+    listingForm.for_sale = true;
+    submitListing();
+};
+
+const unlistAnimal = () => {
+    listingForm.for_sale = false;
+    submitListing();
+};
+
+const submitListing = () => listingForm.put(route('cattle.for-sale.update', props.cattle.id), { preserveScroll: true });
 </script>
 
 <template>
@@ -117,6 +147,48 @@ const deleteMedia = (id: number) => router.delete(route('cattle.media.destroy', 
             </div>
 
             <p v-if="cattle.notes" class="rounded-md border bg-muted/30 p-3 text-sm">{{ cattle.notes }}</p>
+
+            <!-- For-sale listing (§5.9) — clients-only bulletin board -->
+            <section v-if="canEdit" class="space-y-4">
+                <HeadingSmall title="For-sale board" description="List this animal to other clients. You choose exactly which fields are shared." />
+
+                <div v-if="cattle.for_sale" class="space-y-3 rounded-md border border-amber-200 bg-amber-50 p-4">
+                    <p class="text-sm font-medium text-amber-900">Listed on the for-sale board</p>
+                    <p class="text-xs text-amber-800">Only the fields checked below are visible to other clients.</p>
+                </div>
+
+                <form @submit.prevent="submitListing" class="space-y-4 rounded-md border p-4">
+                    <fieldset class="space-y-2">
+                        <legend class="text-sm font-medium">Fields to share</legend>
+                        <label
+                            v-for="(label, key) in shareableFields"
+                            :key="key"
+                            class="flex min-h-11 items-center gap-3 rounded-md border px-3 py-2 text-sm"
+                            :class="listingForm.shared_fields.includes(key) ? 'border-primary bg-primary/5' : ''"
+                        >
+                            <input
+                                type="checkbox"
+                                class="h-5 w-5"
+                                :checked="listingForm.shared_fields.includes(key)"
+                                @change="toggleSharedField(key)"
+                            />
+                            <span>{{ label }}</span>
+                        </label>
+                    </fieldset>
+
+                    <div class="flex flex-wrap gap-2">
+                        <Button v-if="!cattle.for_sale" type="button" class="min-h-11 flex-1" :disabled="listingForm.processing" @click="listAnimal">
+                            List this animal
+                        </Button>
+                        <template v-else>
+                            <Button type="submit" class="min-h-11 flex-1" :disabled="listingForm.processing">Update shared fields</Button>
+                            <Button type="button" variant="outline" class="min-h-11" :disabled="listingForm.processing" @click="unlistAnimal">
+                                Remove listing
+                            </Button>
+                        </template>
+                    </div>
+                </form>
+            </section>
 
             <!-- Health records -->
             <section class="space-y-4">
