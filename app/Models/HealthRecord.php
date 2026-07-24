@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,11 +14,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HealthRecord extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'team_id', 'cattle_id', 'visit_id', 'type', 'payload',
         'bcs_score', 'recorded_at', 'added_by', 'added_role',
+        'edited_by', 'edited_role', 'edited_at',
     ];
 
     protected function casts(): array
@@ -25,7 +27,13 @@ class HealthRecord extends Model
         return [
             'payload' => 'array',
             'recorded_at' => 'datetime',
+            'edited_at' => 'datetime',
         ];
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 
     public function cattle(): BelongsTo
@@ -41,5 +49,16 @@ class HealthRecord extends Model
     public function addedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'added_by');
+    }
+
+    public function editedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'edited_by');
+    }
+
+    /** Staff-authored records are Jeff's professional record — clients may not touch them (§10b). */
+    public function isStaffAuthored(): bool
+    {
+        return $this->added_role === 'staff';
     }
 }

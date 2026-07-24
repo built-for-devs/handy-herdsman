@@ -8,9 +8,13 @@ use App\Models\VisitCompletion;
 use App\Services\Protocol\RecomputeVisit3;
 
 /**
- * When a Visit 2 is completed, Visit 3 must be recomputed from the actual
- * completed timestamp — automatically (§10b — Timing math, 1.3). This observer
- * is the automatic trigger: the completion form (M7) just saves the record.
+ * Reacts to visit completions with two independent, automatic effects:
+ *
+ *  - When a Visit 2 is completed, Visit 3 is recomputed from the actual
+ *    completed timestamp (§10b — Timing math, 1.3). The completion form (M7)
+ *    just saves the record; this observer is the automatic trigger.
+ *  - After a client's first completed visit they are promoted to `active`
+ *    (spec §10b — Client status), so subsequent bookings self-confirm.
  */
 class VisitCompletionObserver
 {
@@ -19,6 +23,9 @@ class VisitCompletionObserver
     public function created(VisitCompletion $completion): void
     {
         $this->maybeRecompute($completion);
+
+        $client = $completion->visit?->team?->client;
+        $client?->recordCompletedVisit($completion->completed_at);
     }
 
     public function updated(VisitCompletion $completion): void

@@ -4,9 +4,13 @@ namespace App\Models;
 
 use App\Enums\AgeStage;
 use App\Enums\AnimalType;
+use App\Enums\CattleStatus;
+use App\Events\CattleDeactivated;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -16,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Cattle extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /** Non-standard plural — the table is `cattle`. */
     protected $table = 'cattle';
@@ -32,6 +36,7 @@ class Cattle extends Model
         return [
             'dob' => 'date',
             'animal_type' => AnimalType::class,
+            'status' => CattleStatus::class,
             'has_calved' => 'boolean',
             'due_date' => 'date',
             'a2a2' => 'boolean',
@@ -88,8 +93,46 @@ class Cattle extends Model
         return $this->hasMany(PregCheck::class);
     }
 
-    public function media()
+    public function visits(): HasMany
+    {
+        return $this->hasMany(Visit::class);
+    }
+
+    public function media(): MorphMany
     {
         return $this->morphMany(Media::class, 'mediable');
+    }
+
+    /** Reminders tied directly to this animal (polymorphic remindable, §5.7). */
+    public function reminders(): MorphMany
+    {
+        return $this->morphMany(Reminder::class, 'remindable');
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === CattleStatus::Active;
+    }
+
+    /**
+     * Mark the animal inactive (sold/deceased/culled/out of program). The
+     * status change fires {@see CattleDeactivated} via the observer,
+     * which cancels all pending reminders immediately (§10b). Nothing is
+     * hard-deleted — the animal stays in records and history.
+     */
+    public function deactivate(): void
+    {
+        if ($this->status !== CattleStatus::Inactive) {
+            $this->status = CattleStatus::Inactive;
+            $this->save();
+        }
+    }
+
+    public function activate(): void
+    {
+        if ($this->status !== CattleStatus::Active) {
+            $this->status = CattleStatus::Active;
+            $this->save();
+        }
     }
 }
