@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\CattleCalved;
 use App\Events\CattleDeactivated;
+use App\Events\VisitCompleted;
 use App\Listeners\CancelPendingRemindersForCattle;
+use App\Listeners\ScheduleRebreedLoop;
+use App\Listeners\ScheduleVisitFollowUps;
 use App\Models\Cattle;
 use App\Models\HealthRecord;
 use App\Models\Media;
@@ -84,5 +88,11 @@ class AppServiceProvider extends ServiceProvider
         // its own listeners into this same hook.
         Cattle::observe(CattleObserver::class);
         Event::listen(CattleDeactivated::class, CancelPendingRemindersForCattle::class);
+
+        // M9 reminder engine (§5.7): a first calving starts the post-calving
+        // rebreed loop; a completed visit schedules the around-a-breeding
+        // follow-ups and any body-condition nutrition nudge.
+        Event::listen(CattleCalved::class, ScheduleRebreedLoop::class);
+        Event::listen(VisitCompleted::class, ScheduleVisitFollowUps::class);
     }
 }
