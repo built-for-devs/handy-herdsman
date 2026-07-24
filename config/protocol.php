@@ -50,6 +50,17 @@ return [
         // over 12 months -> plain animal_type (heifer / cow / bull / steer)
     ],
 
+    /*
+     | Services that physically breed/AI the animal. bull/steer are BLOCKED
+     | from these (§10b — Animal type). Any service with type `protocol`
+     | breeds the animal; the slugs below cover breeding services that are
+     | not of type `protocol` (e.g. on-call heat breeding). Editable data —
+     | adding a breeding service later is config, not a deploy.
+     */
+    'breeding_service_slugs' => [
+        'on-call-heat-breeding',
+    ],
+
     // Sundays are off by default; no Sunday-morning appointment is ever
     // bookable. On-call emergencies bypass availability entirely (§10b).
     'no_sunday_mornings' => true,

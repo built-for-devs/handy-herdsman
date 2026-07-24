@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\ServiceFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Service extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<ServiceFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name', 'slug', 'description', 'category', 'type', 'price_rule',
@@ -27,6 +30,21 @@ class Service extends Model
             'requires_containment' => 'boolean',
             'active' => 'boolean',
         ];
+    }
+
+    /**
+     * Whether this service physically breeds/AIs the animal, and therefore
+     * requires a breeding-eligible animal (heifer/cow, never bull/steer —
+     * §10b). Every `protocol`-type service breeds; a config slug list covers
+     * breeding services of other types (e.g. on-call heat breeding).
+     */
+    public function breedsAnimal(): bool
+    {
+        if ($this->type === 'protocol') {
+            return true;
+        }
+
+        return in_array($this->slug, (array) config('protocol.breeding_service_slugs'), true);
     }
 
     public function usageProfile(): HasOne

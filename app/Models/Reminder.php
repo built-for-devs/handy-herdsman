@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Reminder extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'team_id', 'remindable_type', 'remindable_id', 'fire_at', 'category',
         'channel', 'template', 'recipient_role', 'quiet_hours_deferred_to', 'status', 'sent_at',
