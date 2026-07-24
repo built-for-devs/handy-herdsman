@@ -76,5 +76,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('records/export/download', [ExportController::class, 'download'])->name('records.export.download');
 });
 
+require __DIR__.'/admin.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -10,3 +10,7 @@ Artisan::command('inspire', function () {
 
 // Revert clients idle past the threshold to `inactive` (spec §10b).
 Schedule::command('clients:mark-idle-inactive')->dailyAt('02:00');
+
+// M5 #231 — daily low-stock sweep so Jeff gets reorder alerts before running
+// short mid-season (§5.6b).
+Schedule::command('supplies:check-stock')->dailyAt('07:00');
