@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BlackoutController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\BookingVisitController;
+use App\Http\Controllers\Admin\DispatchController;
 use App\Http\Controllers\Admin\SemenCustodyController;
 use App\Http\Controllers\Admin\SupplyController;
 use App\Http\Middleware\EnsureStaff;
@@ -35,4 +36,9 @@ Route::middleware(['auth', 'verified', EnsureStaff::class])
         Route::patch('visits/{visit}', [BookingVisitController::class, 'update'])->name('visits.update');
         Route::post('visits/{visit}/fail', [BookingVisitController::class, 'fail'])->name('visits.fail');
         Route::post('blackouts', [BlackoutController::class, 'store'])->name('blackouts.store');
+
+        // M11 — dispatch / route view (#251, §5.10). Day list of scheduled
+        // visits with out-of-range flags + distance fee. Read-only; no route
+        // optimization.
+        Route::get('dispatch', [DispatchController::class, 'index'])->name('dispatch.index');
     });

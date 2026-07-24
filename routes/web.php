@@ -7,6 +7,8 @@ use App\Http\Controllers\Cattle\HealthRecordController;
 use App\Http\Controllers\Cattle\MediaController;
 use App\Http\Controllers\Client\CommunicationPreferenceController;
 use App\Http\Controllers\Client\StaffChannelOverrideController;
+use App\Http\Controllers\ForSale\ForSaleBoardController;
+use App\Http\Controllers\ForSale\ForSaleListingController;
 use App\Http\Controllers\Marketing\BlogController;
 use App\Http\Controllers\Marketing\FaqController;
 use App\Http\Controllers\Marketing\HomeController;
@@ -110,6 +112,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Data export — scoped to the requesting client's team (#229).
     Route::get('records/export', [ExportController::class, 'show'])->name('records.export');
     Route::get('records/export/download', [ExportController::class, 'download'])->name('records.export.download');
+
+    // M11 — Cattle-for-sale board (#250, §5.9). Clients-only bulletin board:
+    // the board is visible across authenticated clients; managing a listing is
+    // gated to the animal's team (or staff) via the CattlePolicy.
+    Route::get('for-sale', [ForSaleBoardController::class, 'index'])->name('for-sale.index');
+    Route::get('for-sale/{cattle}', [ForSaleBoardController::class, 'show'])->name('for-sale.show');
+    Route::put('cattle/{cattle}/for-sale', [ForSaleListingController::class, 'update'])->name('cattle.for-sale.update');
 
     // M6 — Booking (#232–#237). Team-scoped client booking flow.
     Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
