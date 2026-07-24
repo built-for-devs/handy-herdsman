@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\TeamFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +17,8 @@ use Laravel\Cashier\Billable;
  */
 class Team extends Model
 {
-    use Billable, SoftDeletes;
+    /** @use HasFactory<TeamFactory> */
+    use Billable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'owner_id',
