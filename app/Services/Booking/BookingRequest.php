@@ -32,6 +32,7 @@ final readonly class BookingRequest
         public ?OnCallKind $onCallKind = null,
         public ?CarbonImmutable $heatObservedAt = null,
         public bool $isCash = false,
+        public ?string $paymentMethodId = null,
     ) {}
 
     public static function make(
@@ -44,6 +45,7 @@ final readonly class BookingRequest
         ?OnCallKind $onCallKind = null,
         ?CarbonInterface $heatObservedAt = null,
         bool $isCash = false,
+        ?string $paymentMethodId = null,
     ): self {
         return new self(
             team: $team,
@@ -55,6 +57,7 @@ final readonly class BookingRequest
             onCallKind: $onCallKind,
             heatObservedAt: $heatObservedAt !== null ? CarbonImmutable::instance($heatObservedAt) : null,
             isCash: $isCash,
+            paymentMethodId: $paymentMethodId,
         );
     }
 }

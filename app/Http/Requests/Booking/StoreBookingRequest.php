@@ -33,6 +33,9 @@ class StoreBookingRequest extends FormRequest
             'oncall_kind' => ['nullable', Rule::enum(OnCallKind::class)],
             'heat_observed_at' => ['nullable', 'date'],
             'is_cash' => ['boolean'],
+            // A Stripe PaymentMethod id captured client-side via Elements /
+            // SetupIntent (spec §5.6). Absent for cash bookings.
+            'payment_method_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

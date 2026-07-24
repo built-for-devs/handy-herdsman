@@ -15,6 +15,8 @@ use App\Observers\VisitCompletionObserver;
 use App\Policies\CattlePolicy;
 use App\Policies\HealthRecordPolicy;
 use App\Policies\MediaPolicy;
+use App\Services\Billing\CashierPaymentGateway;
+use App\Services\Billing\PaymentGateway;
 use App\Services\Geocoding\Geocoder;
 use App\Services\Geocoding\GoogleGeocoder;
 use App\Services\Geocoding\NullGeocoder;
@@ -49,6 +51,10 @@ class AppServiceProvider extends ServiceProvider
 
             return new NullGeocoder;
         });
+
+        // Charge-on-confirm goes through Cashier only (spec §5.6). Bound behind
+        // an interface so tests fake the gateway and never hit real Stripe.
+        $this->app->bind(PaymentGateway::class, CashierPaymentGateway::class);
     }
 
     /**

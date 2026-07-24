@@ -2,6 +2,7 @@
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
+import StripeCardField from '@/components/booking/StripeCardField.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -47,11 +48,18 @@ interface OnCallKind {
     label: string;
 }
 
+interface PaymentSetup {
+    client_secret: string | null;
+    id: string | null;
+    publishable_key: string | null;
+}
+
 const props = defineProps<{
     services: Service[];
     cattle: CattleOption[];
     serviceArea: ServiceArea | null;
     onCallKinds: OnCallKind[];
+    payment: PaymentSetup;
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -71,6 +79,7 @@ const form = useForm<{
     oncall_kind: string | null;
     heat_observed_at: string;
     is_cash: boolean;
+    payment_method_id: string | null;
 }>({
     service_id: null,
     cattle_ids: [],
@@ -78,7 +87,13 @@ const form = useForm<{
     oncall_kind: null,
     heat_observed_at: '',
     is_cash: false,
+    payment_method_id: null,
 });
+
+const stripeAvailable = computed(() => !!props.payment.publishable_key && !!props.payment.client_secret);
+const cardField = ref<InstanceType<typeof StripeCardField> | null>(null);
+const paymentError = ref('');
+const confirmingCard = ref(false);
 
 // The window type of the current selection: cow and heifer windows are ~8h
 // apart so a protocol booking may not mix them (§6.4).
@@ -158,7 +173,26 @@ const canSubmit = computed(() => {
     return !!form.proposed_start;
 });
 
-const submit = () => form.post(route('bookings.store'));
+const submit = async () => {
+    paymentError.value = '';
+
+    // Card payment: capture the method via Stripe Elements before submitting, so
+    // the server only ever sees a PaymentMethod id (spec §5.6).
+    if (!form.is_cash && stripeAvailable.value) {
+        confirmingCard.value = true;
+        const pm = await cardField.value?.confirm();
+        confirmingCard.value = false;
+        if (!pm) {
+            paymentError.value = 'Please enter valid card details, or choose cash.';
+            return;
+        }
+        form.payment_method_id = pm;
+    } else {
+        form.payment_method_id = null;
+    }
+
+    form.post(route('bookings.store'));
+};
 </script>
 
 <template>
@@ -300,12 +334,52 @@ const submit = () => form.post(route('bookings.store'));
                     </div>
                 </div>
 
-                <label class="flex items-center gap-3"
-                    ><input type="checkbox" v-model="form.is_cash" class="size-5" /><span class="text-sm">Paying by cash</span></label
-                >
+                <!-- Step: how will you pay? (§5.6) big card/cash toggle -->
+                <div class="space-y-3">
+                    <p class="text-sm font-medium">How would you like to pay?</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button
+                            type="button"
+                            @click="form.is_cash = false"
+                            class="rounded-xl border p-4 text-center text-sm font-medium transition active:scale-[.99]"
+                            :class="!form.is_cash ? 'border-primary ring-2 ring-primary' : 'hover:bg-muted/50'"
+                        >
+                            Pay by card
+                            <span class="mt-0.5 block text-[11px] font-normal text-muted-foreground">Charged when confirmed</span>
+                        </button>
+                        <button
+                            type="button"
+                            @click="form.is_cash = true"
+                            class="rounded-xl border p-4 text-center text-sm font-medium transition active:scale-[.99]"
+                            :class="form.is_cash ? 'border-primary ring-2 ring-primary' : 'hover:bg-muted/50'"
+                        >
+                            Cash in person
+                            <span class="mt-0.5 block text-[11px] font-normal text-muted-foreground">Settle with Jeff</span>
+                        </button>
+                    </div>
 
-                <Button type="button" class="h-12 w-full text-base" :disabled="!canSubmit || form.processing" @click="submit">
-                    Submit booking
+                    <!-- Card entry via Stripe Elements -->
+                    <div v-if="!form.is_cash">
+                        <StripeCardField
+                            v-if="stripeAvailable"
+                            ref="cardField"
+                            :publishable-key="payment.publishable_key!"
+                            :client-secret="payment.client_secret!"
+                        />
+                        <p v-else class="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+                            Card payments aren't set up yet — choose “Cash in person” and settle with Jeff.
+                        </p>
+                    </div>
+                    <p v-else class="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+                        We'll mark this booking unpaid — Jeff collects cash when he's on the farm.
+                    </p>
+                    <InputError :message="paymentError" />
+                </div>
+
+                <Button type="button" class="h-12 w-full text-base" :disabled="!canSubmit || form.processing || confirmingCard" @click="submit">
+                    <template v-if="form.is_cash">Submit booking</template>
+                    <template v-else-if="estimate">Pay ${{ estimate.total.toFixed(2) }} on confirm</template>
+                    <template v-else>Submit booking</template>
                 </Button>
             </template>
         </div>

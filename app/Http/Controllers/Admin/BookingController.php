@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\BookingStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Services\Billing\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -34,7 +35,7 @@ class BookingController extends Controller
         ]);
     }
 
-    public function confirm(Request $request, Booking $booking): RedirectResponse
+    public function confirm(Request $request, Booking $booking, PaymentService $payments): RedirectResponse
     {
         $booking->forceFill([
             'status' => BookingStatus::Confirmed->value,
@@ -43,6 +44,10 @@ class BookingController extends Controller
             'reviewed_at' => now(),
             'reviewed_by' => $request->user()->id,
         ])->save();
+
+        // Reaching `confirmed` fires the charge on the card captured at booking
+        // (spec §5.5). Cash bookings stay owed for Jeff to settle in person.
+        $payments->settleConfirmedBooking($booking);
 
         return back()->with('status', 'Booking confirmed.');
     }
