@@ -19,6 +19,7 @@ class HealthRecord extends Model
     protected $fillable = [
         'team_id', 'cattle_id', 'visit_id', 'type', 'payload',
         'bcs_score', 'recorded_at', 'added_by', 'added_role',
+        'edited_by', 'edited_role', 'edited_at',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class HealthRecord extends Model
         return [
             'payload' => 'array',
             'recorded_at' => 'datetime',
+            'edited_at' => 'datetime',
         ];
     }
 
@@ -47,5 +49,16 @@ class HealthRecord extends Model
     public function addedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'added_by');
+    }
+
+    public function editedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'edited_by');
+    }
+
+    /** Staff-authored records are Jeff's professional record — clients may not touch them (§10b). */
+    public function isStaffAuthored(): bool
+    {
+        return $this->added_role === 'staff';
     }
 }

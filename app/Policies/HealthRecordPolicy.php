@@ -35,13 +35,20 @@ class HealthRecordPolicy
         return TeamAccess::hasFullAccess($user, $record->team);
     }
 
+    /**
+     * Owners/members may edit their own team's records EXCEPT staff-added ones —
+     * Jeff's farm records are his professional record, audit-protected (§10b).
+     * Staff bypass this via before(), so they can edit client-added records.
+     */
     public function update(User $user, HealthRecord $record): bool
     {
-        return TeamAccess::hasFullAccess($user, $record->team);
+        return TeamAccess::hasFullAccess($user, $record->team)
+            && ! $record->isStaffAuthored();
     }
 
     public function delete(User $user, HealthRecord $record): bool
     {
-        return TeamAccess::hasFullAccess($user, $record->team);
+        return TeamAccess::hasFullAccess($user, $record->team)
+            && ! $record->isStaffAuthored();
     }
 }
