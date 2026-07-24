@@ -28,6 +28,17 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    /*
+     | sent.dm SMS provider (spec §5.7). Config-driven so keys are never
+     | hardcoded; when no key is configured the SMS channel gracefully logs
+     | the message instead of erroring (§5.4 — informal-proposal send).
+     */
+    'sentdm' => [
+        'key' => env('SENTDM_KEY'),
+        'endpoint' => env('SENTDM_ENDPOINT', 'https://api.sent.dm/v1/messages'),
+        'from' => env('SENTDM_FROM'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

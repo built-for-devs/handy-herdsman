@@ -11,6 +11,18 @@ import { Head, Link } from '@inertiajs/vue3';
         <header class="not-has-[nav]:hidden mb-6 w-full max-w-[335px] text-sm lg:max-w-4xl">
             <nav class="flex items-center justify-end gap-4">
                 <Link
+                    :href="route('calculators.ai-timing')"
+                    class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                >
+                    AI Timing Calculator
+                </Link>
+                <Link
+                    :href="route('calculators.due-date')"
+                    class="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
+                >
+                    Due Date Calculator
+                </Link>
+                <Link
                     v-if="$page.props.auth.user"
                     :href="route('dashboard')"
                     class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
@@ -33,6 +45,32 @@ import { Head, Link } from '@inertiajs/vue3';
                 </template>
             </nav>
         </header>
+        <section class="mb-6 w-full max-w-[335px] lg:max-w-4xl">
+            <div
+                class="flex flex-col gap-4 rounded-lg bg-[#1b1b18] p-6 text-white dark:bg-[#161615] lg:flex-row lg:items-center lg:justify-between lg:p-8"
+            >
+                <div>
+                    <h2 class="text-lg font-semibold">Free AI timing &amp; due-date calculators</h2>
+                    <p class="mt-1 text-sm text-white/70">
+                        Plan your CIDR sync visits and estimate your calving window in seconds. Get your plan by email or text.
+                    </p>
+                </div>
+                <div class="flex shrink-0 gap-3">
+                    <Link
+                        :href="route('calculators.ai-timing')"
+                        class="inline-block rounded-sm bg-white px-5 py-2 text-sm font-medium text-[#1b1b18] hover:bg-white/90"
+                    >
+                        AI Timing Calculator
+                    </Link>
+                    <Link
+                        :href="route('calculators.due-date')"
+                        class="inline-block rounded-sm border border-white/40 px-5 py-2 text-sm font-medium text-white hover:border-white"
+                    >
+                        Due Date Calculator
+                    </Link>
+                </div>
+            </div>
+        </section>
         <div class="duration-750 starting:opacity-0 flex w-full items-center justify-center opacity-100 transition-opacity lg:grow">
             <main class="flex w-full max-w-[335px] flex-col-reverse overflow-hidden rounded-lg lg:max-w-4xl lg:flex-row">
                 <div
