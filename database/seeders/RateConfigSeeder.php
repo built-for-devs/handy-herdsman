@@ -28,6 +28,9 @@ class RateConfigSeeder extends Seeder
             // Normal farm-call rate a failed/aborted visit is still billed at
             // (§10b — Rescheduling, failed visits). No automated trip-fee logic.
             ['standard_farm_call', ['price' => 100], 'Standard farm call (also the failed-visit rate)', 'fees'],
+            // Cost-of-driving rate for profit + tax-deduction reporting (§5.6c).
+            // Placeholder = IRS 2024 standard business mileage rate; editable.
+            ['mileage_cost_per_mile', ['price' => 0.67], 'Mileage cost per mile (COGS + tax deduction)', 'fees'],
 
             // Straw-cost REFERENCE ranges — not our prices; shown in FAQ only (§2).
             ['straw_cost_reference', [
