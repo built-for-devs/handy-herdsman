@@ -6,6 +6,7 @@ use App\Enums\AgeStage;
 use App\Enums\AnimalType;
 use App\Enums\CattleStatus;
 use App\Events\CattleDeactivated;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,7 +29,7 @@ class Cattle extends Model
     protected $fillable = [
         'team_id', 'reg_name', 'herd_number', 'dob', 'breed',
         'animal_type', 'has_calved', 'due_date', 'status', 'a2a2',
-        'for_sale', 'for_sale_shared_fields', 'notes',
+        'for_sale', 'for_sale_shared_fields', 'for_sale_listed_by_role', 'notes',
     ];
 
     protected function casts(): array
@@ -134,5 +135,49 @@ class Cattle extends Model
             $this->status = CattleStatus::Active;
             $this->save();
         }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cattle-for-sale board (§5.9)
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * List the animal on the clients-only for-sale board, sharing only the
+     * chosen profile fields. `$fields` is filtered to the config shareable
+     * catalogue so an unknown/private field can never be exposed. `$role`
+     * records whether the client or staff posted the listing (§5.9).
+     *
+     * @param  list<string>  $fields
+     */
+    public function listForSale(array $fields, string $role): void
+    {
+        $allowed = array_keys(config('for_sale.shareable_fields'));
+
+        $this->for_sale = true;
+        $this->for_sale_shared_fields = array_values(array_intersect($fields, $allowed));
+        $this->for_sale_listed_by_role = $role;
+        $this->save();
+    }
+
+    /** Remove the animal from the board without touching its profile (§5.9). */
+    public function unlistFromSale(): void
+    {
+        $this->for_sale = false;
+        $this->for_sale_shared_fields = null;
+        $this->for_sale_listed_by_role = null;
+        $this->save();
+    }
+
+    /**
+     * Animals currently listed on the for-sale board: for sale AND active
+     * (a sold/inactive animal drops off the board).
+     *
+     * @param  Builder<Cattle>  $query
+     */
+    public function scopeListedForSale($query): void
+    {
+        $query->where('for_sale', true)->where('status', CattleStatus::Active->value);
     }
 }
