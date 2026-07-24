@@ -2,21 +2,22 @@
 
 namespace App\Models;
 
-use Database\Factories\DirectoryEntryFactory;
+use Database\Factories\FaqFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * DirectoryEntry — staff-curated local resource directory (§5.8).
+ * Faq — public FAQ entry (§5.1, issue 2.8). Straw-cost reference ranges are
+ * pulled from rate_config on the page, not stored here.
  */
-class DirectoryEntry extends Model
+class Faq extends Model
 {
-    /** @use HasFactory<DirectoryEntryFactory> */
+    /** @use HasFactory<FaqFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'category', 'name', 'area', 'url', 'notes', 'active',
+        'category', 'question', 'answer', 'active', 'sort_order',
     ];
 
     protected function casts(): array

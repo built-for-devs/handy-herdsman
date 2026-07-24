@@ -21,6 +21,10 @@ class DatabaseSeeder extends Seeder
             GestationConfigSeeder::class,
             ServiceAreaSeeder::class,
             AvailabilitySeeder::class,
+            // M2 — public marketing site content (§5.3, §5.8, §5.1).
+            BlogSeeder::class,
+            DirectoryEntrySeeder::class,
+            FaqSeeder::class,
         ]);
     }
 }
