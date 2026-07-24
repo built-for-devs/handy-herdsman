@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DirectoryEntryController;
+use App\Http\Controllers\Booking\BookingController;
 use App\Http\Controllers\Cattle\CattleController;
 use App\Http\Controllers\Cattle\HealthRecordController;
 use App\Http\Controllers\Cattle\MediaController;
@@ -109,6 +110,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Data export — scoped to the requesting client's team (#229).
     Route::get('records/export', [ExportController::class, 'show'])->name('records.export');
     Route::get('records/export/download', [ExportController::class, 'download'])->name('records.export.download');
+
+    // M6 — Booking (#232–#237). Team-scoped client booking flow.
+    Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
+    Route::get('bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+    Route::get('bookings/candidates', [BookingController::class, 'candidates'])->name('bookings.candidates');
+    Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
 });
 
 // Staff admin — resource directory CRUD (§5.8). Soft-deletes only (§10b).

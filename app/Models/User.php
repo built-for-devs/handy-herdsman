@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -104,5 +105,21 @@ class User extends Authenticatable
     public function optedIntoCategory(int $category): bool
     {
         return (bool) data_get($this->notification_opt_ins, (string) $category, false);
+    }
+
+    /** Route SMS (sent.dm) notifications to the user's phone number (§5.5). */
+    public function routeNotificationForSentdm(): ?string
+    {
+        return $this->phone;
+    }
+
+    /**
+     * Global staff (Jeff / Tessa) — the recipients of the on-call pager (§6.5).
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeStaff($query)
+    {
+        return $query->where('is_staff', true);
     }
 }
