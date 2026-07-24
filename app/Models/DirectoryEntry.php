@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\DirectoryEntryFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -10,7 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class DirectoryEntry extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<DirectoryEntryFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'category', 'name', 'area', 'url', 'notes', 'active',

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\ProtocolFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,11 +16,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Protocol extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<ProtocolFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'team_id', 'booking_id', 'service_id', 'plan_type', 'animal_type',
-        'visit1_at', 'visit2_at', 'visit3_window_start', 'visit3_window_end', 'status',
+        'visit1_at', 'visit2_at', 'visit3_window_start', 'visit3_window_end',
+        'visit3_recommended_at', 'visit3_conflict', 'visit3_conflict_reason', 'status',
     ];
 
     protected function casts(): array
@@ -28,6 +32,8 @@ class Protocol extends Model
             'visit2_at' => 'datetime',
             'visit3_window_start' => 'datetime',
             'visit3_window_end' => 'datetime',
+            'visit3_recommended_at' => 'datetime',
+            'visit3_conflict' => 'boolean',
         ];
     }
 

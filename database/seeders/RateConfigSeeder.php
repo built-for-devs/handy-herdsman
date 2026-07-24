@@ -21,7 +21,16 @@ class RateConfigSeeder extends Seeder
             ['semen_receipt_fee', ['price' => 15], 'Semen receipt (per shipment)', 'semen'],
             ['semen_storage_annual', ['price' => 50, 'free_year_one' => true, 'max_straws' => 10], 'Semen storage (free yr 1 w/ AI, then $50/yr)', 'semen'],
             ['distance_fee', ['price' => 30, 'threshold_miles' => 15, 'per' => 'booking'], 'Distance fee (>15mi, per booking/protocol)', 'fees'],
+            // Optional lab confirmation on a blood preg check — charged ONLY if
+            // the client opts in; the base price is the draw itself (§10b).
+            ['preg_check_lab_confirmation', ['price' => 15], 'Preg check — optional lab confirmation (per head)', 'breeding'],
             ['visit_minimum', ['price' => 50, 'per' => 'visit'], 'Per-visit minimum', 'fees'],
+            // Normal farm-call rate a failed/aborted visit is still billed at
+            // (§10b — Rescheduling, failed visits). No automated trip-fee logic.
+            ['standard_farm_call', ['price' => 100], 'Standard farm call (also the failed-visit rate)', 'fees'],
+            // Cost-of-driving rate for profit + tax-deduction reporting (§5.6c).
+            // Placeholder = IRS 2024 standard business mileage rate; editable.
+            ['mileage_cost_per_mile', ['price' => 0.67], 'Mileage cost per mile (COGS + tax deduction)', 'fees'],
 
             // Straw-cost REFERENCE ranges — not our prices; shown in FAQ only (§2).
             ['straw_cost_reference', [
