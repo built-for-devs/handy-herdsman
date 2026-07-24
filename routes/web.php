@@ -35,12 +35,12 @@ Route::get('/services', ServiceController::class)->name('services');
 Route::get('/pricing', PricingController::class)->name('pricing');
 Route::get('/faq', FaqController::class)->name('faq');
 
-// Resources ▾ dropdown (§5.1). AI Timing (2.5) + Due Date (2.6) calculators are
-// placeholder shells until the M1 timing engine lands; Cattle-for-Sale (§5.9)
-// is a later milestone. Resource Directory (2.7) is live below.
+// Resources ▾ dropdown (§5.1). AI Timing (2.5) + Due Date (2.6) are the live
+// calculators (M1 engine landed); the marketing nav points here. Cattle-for-Sale
+// (§5.9) is a later milestone; Resource Directory (2.7) is live below.
 Route::prefix('resources')->name('resources.')->group(function () {
-    Route::get('/ai-timing-calculator', [PlaceholderController::class, 'aiTiming'])->name('ai-timing');
-    Route::get('/due-date-calculator', [PlaceholderController::class, 'dueDate'])->name('due-date');
+    Route::get('/ai-timing-calculator', [AiTimingCalculatorController::class, 'show'])->name('ai-timing');
+    Route::get('/due-date-calculator', [DueDateCalculatorController::class, 'show'])->name('due-date');
     Route::get('/directory', ResourceDirectoryController::class)->name('directory');
     Route::get('/cattle-for-sale', [PlaceholderController::class, 'cattleForSale'])->name('cattle-for-sale');
 });

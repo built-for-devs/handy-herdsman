@@ -46,9 +46,24 @@ class NavigationTest extends TestCase
     public static function placeholderRouteProvider(): array
     {
         return [
-            'ai timing calculator' => ['/resources/ai-timing-calculator'],
-            'due date calculator' => ['/resources/due-date-calculator'],
             'cattle for sale' => ['/resources/cattle-for-sale'],
+        ];
+    }
+
+    #[DataProvider('liveCalculatorRouteProvider')]
+    public function test_resources_calculators_render_the_live_tools(string $path, string $component): void
+    {
+        $this->get($path)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component($component));
+    }
+
+    /** @return array<string, array{0: string, 1: string}> */
+    public static function liveCalculatorRouteProvider(): array
+    {
+        return [
+            'ai timing calculator' => ['/resources/ai-timing-calculator', 'public/AiTimingCalculator'],
+            'due date calculator' => ['/resources/due-date-calculator', 'public/DueDateCalculator'],
         ];
     }
 }

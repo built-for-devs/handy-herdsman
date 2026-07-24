@@ -66,7 +66,7 @@ class RecordExporter
                 'herd_number' => $cattle->herd_number,
                 'dob' => optional($cattle->dob)->toDateString(),
                 'breed' => $cattle->breed,
-                'animal_type' => $cattle->animal_type,
+                'animal_type' => $cattle->animal_type->value,
                 'has_calved' => $cattle->has_calved,
                 'status' => $cattle->status->value,
                 'for_sale' => $cattle->for_sale,
