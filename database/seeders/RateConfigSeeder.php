@@ -22,6 +22,9 @@ class RateConfigSeeder extends Seeder
             ['semen_storage_annual', ['price' => 50, 'free_year_one' => true, 'max_straws' => 10], 'Semen storage (free yr 1 w/ AI, then $50/yr)', 'semen'],
             ['distance_fee', ['price' => 30, 'threshold_miles' => 15, 'per' => 'booking'], 'Distance fee (>15mi, per booking/protocol)', 'fees'],
             ['visit_minimum', ['price' => 50, 'per' => 'visit'], 'Per-visit minimum', 'fees'],
+            // Normal farm-call rate a failed/aborted visit is still billed at
+            // (§10b — Rescheduling, failed visits). No automated trip-fee logic.
+            ['standard_farm_call', ['price' => 100], 'Standard farm call (also the failed-visit rate)', 'fees'],
 
             // Straw-cost REFERENCE ranges — not our prices; shown in FAQ only (§2).
             ['straw_cost_reference', [

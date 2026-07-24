@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\ProtocolFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,7 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Protocol extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<ProtocolFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'team_id', 'booking_id', 'service_id', 'plan_type', 'animal_type',

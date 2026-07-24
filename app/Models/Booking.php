@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\BookingStatus;
+use Database\Factories\BookingFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -14,11 +18,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Booking extends Model
 {
-    use SoftDeletes;
+    /** @use HasFactory<BookingFactory> */
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'team_id', 'service_id', 'created_by', 'proposed_start', 'computed_windows',
-        'status', 'requires_review', 'is_oncall', 'distance_fee_flag', 'is_cash', 'reviewed_at',
+        'status', 'requires_review', 'review_reason', 'is_oncall', 'distance_fee_flag',
+        'is_cash', 'reviewed_at', 'reviewed_by', 'decline_reason',
     ];
 
     protected function casts(): array
@@ -52,5 +58,35 @@ class Booking extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function protocol(): HasOne
+    {
+        return $this->hasOne(Protocol::class);
+    }
+
+    public function visits(): HasMany
+    {
+        return $this->hasMany(Visit::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+
+    public function bookingStatus(): BookingStatus
+    {
+        return BookingStatus::from($this->status);
+    }
+
+    public function isProvisional(): bool
+    {
+        return $this->status === BookingStatus::Provisional->value;
     }
 }

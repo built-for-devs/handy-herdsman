@@ -17,8 +17,8 @@ class Visit extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'team_id', 'cattle_id', 'protocol_id', 'booking_id', 'type',
-        'scheduled_at', 'completed_at', 'staff_notes', 'mileage', 'fee_applied',
+        'team_id', 'cattle_id', 'protocol_id', 'booking_id', 'type', 'status',
+        'scheduled_at', 'completed_at', 'staff_notes', 'mileage', 'fee_applied', 'billed_amount',
     ];
 
     protected function casts(): array
@@ -28,12 +28,18 @@ class Visit extends Model
             'completed_at' => 'datetime',
             'mileage' => 'decimal:2',
             'fee_applied' => 'boolean',
+            'billed_amount' => 'decimal:2',
         ];
     }
 
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class);
     }
 
     public function protocol(): BelongsTo
