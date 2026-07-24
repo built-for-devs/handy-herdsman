@@ -144,6 +144,21 @@ class SemenCustodyService
     }
 
     /**
+     * Record a wasted/failed straw at an appointment: appends a `wasted` entry
+     * and shrinks the count. Kept separate from `used` so waste is visible and
+     * counts stay honest (§5.5). Never lets a lot go negative.
+     */
+    public function wasteStraws(
+        SemenInventory $lot,
+        int $straws,
+        ?CarbonInterface $occurredAt = null,
+        ?User $recordedBy = null,
+        ?string $notes = null,
+    ): SemenLedgerEntry {
+        return $this->removeStraws($lot, $straws, SemenLedgerEntry::TYPE_WASTED, null, $occurredAt, $recordedBy, $notes);
+    }
+
+    /**
      * Record straws transferred out of our custody (e.g. moved to another
      * facility): appends a `transferred` entry and shrinks the count.
      */

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -60,5 +61,41 @@ class Visit extends Model
     public function media()
     {
         return $this->morphMany(Media::class, 'mediable');
+    }
+
+    /** The service this visit performs, resolved via its booking (§5.5). */
+    public function service(): ?Service
+    {
+        return $this->booking?->service;
+    }
+
+    /**
+     * Whether this is a breeding-related visit — BCS is REQUIRED per animal on
+     * these (§5.5). Any protocol visit (V1/V2/V3) breeds; other services breed
+     * when their service is a breeding service (config-driven `breedsAnimal()`).
+     */
+    public function isBreedingRelated(): bool
+    {
+        if ($this->protocol_id !== null) {
+            return true;
+        }
+
+        return (bool) $this->service()?->breedsAnimal();
+    }
+
+    /**
+     * The animals covered by this visit for the completion form. A visit may
+     * pin a single animal (`cattle_id`); otherwise it covers every animal on
+     * the booking (multi-head visits, §10b).
+     *
+     * @return Collection<int, Cattle>
+     */
+    public function animals(): Collection
+    {
+        if ($this->cattle_id !== null && $this->cattle !== null) {
+            return new Collection([$this->cattle]);
+        }
+
+        return $this->booking?->cattle()->get() ?? new Collection;
     }
 }

@@ -54,4 +54,32 @@ return [
             'bypasses_quiet_hours' => false,
         ],
     ],
+
+    /*
+     | Nurture scheduling driven by a FINAL preg-check result (§10b — Preg
+     | check results). M7 writes the reminder rows; M9's engine sends them.
+     | Config over code: offsets are editable, never hardcoded.
+     |
+     |  - `bred`    → calving-countdown reminders at the gestation milestones
+     |               (config/gestation.php `milestones`), category 1.
+     |  - `open`    → a rebreed prompt this many days out ("don't lose the
+     |               season"), category 3.
+     |  - `recheck` → schedule another check this many days out, category 3.
+     */
+    'nurture' => [
+        'calving_countdown' => [
+            'category' => 1,
+            'template' => 'calving_countdown',
+        ],
+        'rebreed_prompt' => [
+            'category' => 3,
+            'template' => 'rebreed_prompt',
+            'after_days' => 0,
+        ],
+        'preg_recheck' => [
+            'category' => 3,
+            'template' => 'preg_recheck',
+            'after_days' => 30,
+        ],
+    ],
 ];
