@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\Cattle\CattleController;
+use App\Http\Controllers\Cattle\HealthRecordController;
+use App\Http\Controllers\Cattle\MediaController;
 use App\Http\Controllers\Client\CommunicationPreferenceController;
 use App\Http\Controllers\Client\StaffChannelOverrideController;
 use App\Http\Controllers\Onboarding\ClientOnboardingController;
+use App\Http\Controllers\Records\ExportController;
 use App\Http\Controllers\Team\TeamInvitationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -34,6 +38,26 @@ Route::middleware('auth')->group(function () {
 
     // Staff channel override per client (#225, §5.7).
     Route::put('clients/{client}/channel-override', [StaffChannelOverrideController::class, 'update'])->name('clients.channel-override.update');
+});
+
+// M4 — Herd records portal (spec §5.5, §6, §10b).
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Cattle profiles CRUD (#226).
+    Route::resource('cattle', CattleController::class)->parameters(['cattle' => 'cattle']);
+
+    // Health records nested under an animal (#227).
+    Route::post('cattle/{cattle}/records', [HealthRecordController::class, 'store'])->name('cattle.records.store');
+    Route::put('records/{record}', [HealthRecordController::class, 'update'])->name('records.update');
+    Route::delete('records/{record}', [HealthRecordController::class, 'destroy'])->name('records.destroy');
+
+    // Photo/media uploads (#228).
+    Route::post('cattle/{cattle}/media', [MediaController::class, 'store'])->name('cattle.media.store');
+    Route::get('media/{media}', [MediaController::class, 'show'])->name('cattle.media.show');
+    Route::delete('media/{media}', [MediaController::class, 'destroy'])->name('cattle.media.destroy');
+
+    // Data export — scoped to the requesting client's team (#229).
+    Route::get('records/export', [ExportController::class, 'show'])->name('records.export');
+    Route::get('records/export/download', [ExportController::class, 'download'])->name('records.export.download');
 });
 
 require __DIR__.'/settings.php';
