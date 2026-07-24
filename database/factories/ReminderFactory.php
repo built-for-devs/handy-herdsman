@@ -41,4 +41,19 @@ class ReminderFactory extends Factory
     {
         return $this->state(fn () => ['status' => $status]);
     }
+
+    public function category(int $category): static
+    {
+        return $this->state(fn () => ['category' => $category]);
+    }
+
+    public function template(string $template): static
+    {
+        return $this->state(fn () => ['template' => $template]);
+    }
+
+    public function fireAt(\DateTimeInterface $fireAt): static
+    {
+        return $this->state(fn () => ['fire_at' => $fireAt]);
+    }
 }
