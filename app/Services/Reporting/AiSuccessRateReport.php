@@ -156,7 +156,7 @@ class AiSuccessRateReport
                     'client_name' => $group->first()->clientName,
                     'breedings' => $group->count(),
                     'last_bred_at' => $lastBred !== null ? CarbonImmutable::createFromTimestamp($lastBred)->toDateString() : null,
-                    'dormant_days' => $lastBred !== null ? $now->diffInDays(CarbonImmutable::createFromTimestamp($lastBred)->startOfDay()) : null,
+                    'dormant_days' => $lastBred !== null ? (int) CarbonImmutable::createFromTimestamp($lastBred)->startOfDay()->diffInDays($now->startOfDay(), true) : null,
                 ], $rate);
             })
             ->sortByDesc('conception_rate')
