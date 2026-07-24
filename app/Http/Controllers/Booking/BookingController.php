@@ -15,6 +15,8 @@ use App\Http\Requests\Booking\StoreBookingRequest;
 use App\Models\Booking;
 use App\Models\Cattle;
 use App\Models\Service;
+use App\Services\Billing\PaymentGateway;
+use App\Services\Billing\PaymentService;
 use App\Services\Booking\BookingRequest;
 use App\Services\Booking\BookingService;
 use App\Services\Booking\ProtocolScheduler;
@@ -39,6 +41,8 @@ class BookingController extends Controller
         private BookingService $bookings,
         private ProtocolScheduler $scheduler,
         private ServiceAreaResolver $serviceArea,
+        private PaymentService $payments,
+        private PaymentGateway $gateway,
     ) {}
 
     public function index(Request $request): Response
@@ -86,6 +90,10 @@ class BookingController extends Controller
                 'value' => $k->value,
                 'label' => $k->label(),
             ]),
+            // Card capture at booking via Stripe Elements (spec §5.6). When
+            // Stripe is not configured this is all null and the UI falls back
+            // to cash-only, never blocking a booking.
+            'payment' => $this->gateway->createSetupIntent($team),
         ]);
     }
 
@@ -112,7 +120,7 @@ class BookingController extends Controller
         $service = Service::findOrFail($data['service_id']);
 
         try {
-            $this->bookings->book(BookingRequest::make(
+            $booking = $this->bookings->book(BookingRequest::make(
                 team: $team,
                 service: $service,
                 cattleIds: $data['cattle_ids'],
@@ -122,7 +130,14 @@ class BookingController extends Controller
                 onCallKind: isset($data['oncall_kind']) ? OnCallKind::from($data['oncall_kind']) : null,
                 heatObservedAt: isset($data['heat_observed_at']) ? CarbonImmutable::parse($data['heat_observed_at']) : null,
                 isCash: (bool) ($data['is_cash'] ?? false),
+                paymentMethodId: $data['payment_method_id'] ?? null,
             ));
+
+            // Capture the card (or record cash owed) at booking, then charge if
+            // the booking already reached `confirmed` (established clients
+            // auto-confirm). First-timers stay provisional — charged on approval.
+            $this->payments->recordBookingPayment($booking, $data['payment_method_id'] ?? null);
+            $this->payments->settleConfirmedBooking($booking);
         } catch (MixedGroupException $e) {
             return back()->withErrors(['cattle_ids' => $e->getMessage()])
                 ->with('splitGroups', $e->splitGroups);
