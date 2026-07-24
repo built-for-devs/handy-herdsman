@@ -20,6 +20,8 @@ use App\Http\Controllers\Onboarding\ClientOnboardingController;
 use App\Http\Controllers\Public\AiTimingCalculatorController;
 use App\Http\Controllers\Public\DueDateCalculatorController;
 use App\Http\Controllers\Records\ExportController;
+use App\Http\Controllers\Reporting\AiSuccessReportController;
+use App\Http\Controllers\Reporting\ProfitabilityReportController;
 use App\Http\Controllers\Team\TeamInvitationController;
 use App\Http\Middleware\EnsureUserIsStaff;
 use Illuminate\Support\Facades\Route;
@@ -116,6 +118,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('bookings/create', [BookingController::class, 'create'])->name('bookings.create');
     Route::get('bookings/candidates', [BookingController::class, 'candidates'])->name('bookings.candidates');
     Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
+
+    // M10 — Reporting (#248, #249). Staff see the aggregate; a client sees only
+    // their own team's numbers (scope decided in-controller from the staff flag).
+    Route::get('reports/profitability', [ProfitabilityReportController::class, 'index'])->name('reports.profitability');
+    Route::get('reports/breeding', [AiSuccessReportController::class, 'index'])->name('reports.breeding');
 });
 
 // Staff admin — resource directory CRUD (§5.8). Soft-deletes only (§10b).
