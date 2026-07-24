@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\CattleStatus;
 use App\Enums\PregCheckMethod;
 use App\Enums\PregCheckState;
 use App\Http\Controllers\Controller;
@@ -46,6 +47,19 @@ class PregCheckController extends Controller
                 ->values(),
             'labFee' => $this->checks->labFee(),
             'finalStates' => array_map(fn (PregCheckState $s) => $s->value, PregCheckState::finalStates()),
+            'methods' => array_map(fn (PregCheckMethod $m) => $m->value, PregCheckMethod::cases()),
+            'cattle' => Cattle::query()
+                ->where('status', CattleStatus::Active->value)
+                ->with('team:id,name')
+                ->orderBy('reg_name')
+                ->orderBy('herd_number')
+                ->get()
+                ->map(fn (Cattle $c) => [
+                    'id' => $c->id,
+                    'label' => $c->reg_name ?? $c->herd_number ?? "Animal #{$c->id}",
+                    'team' => $c->team?->name,
+                ])
+                ->values(),
         ]);
     }
 
